@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>我的外卖 App</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .food-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        .price {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🍔 欢迎来到 Life Forest 食堂</h1>
+    <button onclick="loadFood()">刷新菜单</button>
+
+    <div id="menu-container">
+        <p>正在加载美味...</p>
+    </div>
+
+    <script>
+        // 这是前端 JavaScript 代码
+        async function loadFood() {
+            try {
+                // 1. 就像你在 Swagger 里点 Execute 一样，浏览器帮我们去请求 API
+                // fetch 是现代浏览器用来发请求的函数
+                const response = await fetch('/api/Food');
+
+                // 2. 把拿到的结果转成 JSON (数组)
+                const foods = await response.json();
+
+                // 3. 找到那个容器
+                const container = document.getElementById('menu-container');
+                container.innerHTML = ''; // 先清空里面的字
+
+                // 4. 循环每一个菜，把它画在屏幕上
+                foods.forEach(food => {
+                    // 创建一个 div
+                    const card = document.createElement('div');
+                    card.className = 'food-card';
+
+                    // 填入内容 (这是 ES6 的模板字符串写法)
+                    card.innerHTML = `
+                                    <h2>${food.name}</h2>
+                                    <p class="price">RM ${food.price}</p>
+                                    <button onclick = "orderFood(${food.id})">Order</button>
+                                `;
+
+                    // 把卡片塞进容器
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('出错了:', error);
+                alert('加载失败！是不是后端没跑起来？');
+            }
+        }
+
+        async function orderFood(id) {
+            // 1. 去掉 'int'，JS 不认识它
+            try {
+                const response = await fetch('/api/Order', {
+                    method: "POST",  // 2. 这里加了逗号
+
+                    // 3. 🔥 必须加上这个 Header！告诉后端这是 JSON
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+
+                    body: JSON.stringify({
+                        foodItemId: id,
+                        // 如果后端之前把 foodItem 里的那堆 null 删了，这里就很安全
+                        // 如果后端没用 DTO，这里只要确保不传 foodItem 对象就行
+                        customerName: "VIP 客户",
+                        quantity: 1
+                    })
+                });
+
+                // 4. 给个反馈，告诉自己成功了
+                if (response.ok) {
+                    alert("🎉 下单成功！后厨正在制作！");
+                } else {
+                    alert("❌ 下单失败，去 F12 看看控制台？");
+                }
+            } catch (error) {
+                console.error("网络错误:", error);
+                alert("网络连不上了？");
+            }
+        }
+
+        // 页面一打开，自动加载一次
+        loadFood();
+    </script>
+</body>
+</html>
