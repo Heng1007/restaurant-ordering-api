@@ -1,8 +1,7 @@
-﻿using FoodDeliveryServer.Data;
+﻿using FoodDeliveryServer.Dtos;
 using FoodDeliveryServer.Models;
 using FoodDeliveryServer.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FoodDeliveryServer.Controllers
 {
@@ -21,17 +20,17 @@ namespace FoodDeliveryServer.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Order>>> GetOrders()
         {
-            var order = await _orderService.GetAllOrders();
+            var order = await _orderService.GetOrders();
             return Ok(order);
         }
 
         // 2. 下单 (Create Order)
         [HttpPost]
-        public async Task<ActionResult<Order>> CreateOrder(Order order)
+        public async Task<ActionResult<Order>> CreateOrder(CreateOrderDto dto)
         {
-            await _orderService.CreateOrder(order);
+            var order = await _orderService.CreateOrder(dto);
 
-            return CreatedAtAction(nameof(GetOrders), new { id = order.Id }, order);
+            return Ok(order);
         }
 
         [HttpGet("TopSpender")]

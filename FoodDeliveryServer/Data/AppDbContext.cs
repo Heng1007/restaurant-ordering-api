@@ -15,5 +15,6 @@ namespace FoodDeliveryServer.Data
         // DbSet<FoodItem> 表示数据库里会有一张表叫 "FoodItems"
         public DbSet<FoodItem> FoodItems { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
     }
 }

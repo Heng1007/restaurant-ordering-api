@@ -1,11 +1,12 @@
-﻿using FoodDeliveryServer.Models;
+﻿using FoodDeliveryServer.Dtos;
+using FoodDeliveryServer.Models;
 
 namespace FoodDeliveryServer.Services
 {
     public interface IOrderService
     {
-        Task<List<Order>> GetAllOrders();
-        Task CreateOrder(Order order);
+        Task<List<Order>> GetOrders();
+        Task<Order> CreateOrder(CreateOrderDto order);
 
         Task<TopSpenderDto?> GetTopSpender();
     }
