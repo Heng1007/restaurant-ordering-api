@@ -1,6 +1,7 @@
 ﻿using FoodDeliveryServer.Data;
 using FoodDeliveryServer.Dtos;
 using FoodDeliveryServer.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace FoodDeliveryServer.Services
@@ -16,12 +17,45 @@ namespace FoodDeliveryServer.Services
             _aiService = aiService;
         }
 
-        public async Task<List<Order>> GetOrders()
+        public async Task<PagedResult<Order>> GetOrdersAsync(int page, int pageSize)
         {
-            return await _context.Orders.Include(o => o.Items).ThenInclude(i => i.Food).ToListAsync();
+            var totalCount = await _context.Orders.CountAsync();
+            var skipAmount = (page - 1) * pageSize;
+
+            var items = await _context.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Food)
+                .OrderByDescending(o => o.OrderDate)
+                .Skip(skipAmount)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<Order>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = page,
+                PageSize = pageSize
+            };
         }
 
-        public async Task<Order> CreateOrder(CreateOrderDto dto)
+        public async Task<List<Order>> GetOrders()
+        {
+
+            return await _context.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Food)
+                .ToListAsync();
+        }
+
+        public async Task<List<Order>> GetOrdersByUserId(int userId)
+        {
+            return await _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.Items).ThenInclude(i => i.Food).ToListAsync();
+        }
+
+        public async Task<Order> CreateOrder(int userId, CreateOrderDto dto)
         {
             decimal totalPrice = 0;
             var finalOrderItems = new List<OrderItem>();
@@ -53,7 +87,7 @@ namespace FoodDeliveryServer.Services
 
             var order = new Order
             {
-                UserId = dto.UserId,
+                UserId = userId,
                 OrderDate = DateTime.Now,
                 CustomerNote = dto.CustomerNote,
                 TotalPrice = totalPrice,
@@ -79,6 +113,16 @@ namespace FoodDeliveryServer.Services
                 .OrderByDescending(x => x.TotalSpent)
                 .FirstOrDefaultAsync(); // 👈 直接拿第1个，拿不到就是 null
             return topSpender;
+        }
+
+        public async Task SetOrderStatus(int orderId, OrderStatus status)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null) return;
+
+            order.Status = status;
+
+            await _context.SaveChangesAsync();
         }
     }
 

@@ -2,112 +2,326 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我的外卖 App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heng's Food Delivery</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: sans-serif;
-            padding: 20px;
+            background-color: #f8f9fa;
         }
 
-        .food-card {
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
-            background-color: #f9f9f9;
+        .card {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: none;
         }
 
-        h2 {
-            color: #2c3e50;
+        .hidden {
+            display: none !important;
         }
 
-        .price {
-            color: green;
-            font-weight: bold;
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
 
-    <h1>🍔 欢迎来到 Life Forest 食堂</h1>
-    <button onclick="loadFood()">刷新菜单</button>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">🍔 Heng's Delivery</a>
+            <div class="d-flex">
+                <span id="user-info" class="navbar-text text-white me-3 hidden"></span>
+                <button id="btn-logout" class="btn btn-light btn-sm hidden" onclick="logout()">退出</button>
+            </div>
+        </div>
+    </nav>
 
-    <div id="menu-container">
-        <p>正在加载美味...</p>
+    <div class="container">
+
+        <div id="loading" class="spinner-border text-primary hidden" role="status"></div>
+
+        <div id="auth-section" class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card p-4">
+                    <h3 class="text-center mb-3">欢迎光临</h3>
+
+                    <div id="login-form">
+                        <input type="text" id="login-username" class="form-control mb-2" placeholder="用户名">
+                        <input type="password" id="login-password" class="form-control mb-3" placeholder="密码">
+                        <button class="btn btn-primary w-100" onclick="login()">登录</button>
+                        <p class="text-center mt-2">
+                            <small>还没账号? <a href="#" onclick="toggleAuth('register')">去注册</a></small>
+                        </p>
+                    </div>
+
+                    <div id="register-form" class="hidden">
+                        <input type="text" id="reg-username" class="form-control mb-2" placeholder="新用户名">
+                        <input type="password" id="reg-password" class="form-control mb-2" placeholder="设置密码">
+                        <select id="reg-role" class="form-select mb-3">
+                            <option value="User">我是顾客 (User)</option>
+                            <option value="Admin">我是老板 (Admin)</option>
+                        </select>
+                        <button class="btn btn-success w-100" onclick="register()">注册账号</button>
+                        <p class="text-center mt-2">
+                            <small>已有账号? <a href="#" onclick="toggleAuth('login')">去登录</a></small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboard-section" class="hidden">
+
+            <div class="row mb-4">
+                <div class="col-md-12 text-center">
+                    <button class="btn btn-outline-primary me-2" onclick="fetchOrders()">🔄 刷新订单</button>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#orderModal">➕ 我要点餐</button>
+                </div>
+            </div>
+
+            <div class="row" id="orders-container">
+            </div>
+        </div>
     </div>
 
+    <div class="modal fade" id="orderModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">创建新订单</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>收货人姓名</label>
+                        <input type="text" id="order-name" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>收货地址</label>
+                        <input type="text" id="order-address" class="form-control">
+                    </div>
+                    <hr>
+                    <h6>菜品选择 (模拟)</h6>
+                    <div class="form-check">
+                        <input class="form-check-input food-item" type="checkbox" value="1" data-price="15">
+                        <label class="form-check-label">🍔 经典汉堡 ($15)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input food-item" type="checkbox" value="2" data-price="5">
+                        <label class="form-check-label">🍟 薯条 ($5)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input food-item" type="checkbox" value="3" data-price="3">
+                        <label class="form-check-label">🥤 可乐 ($3)</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="createOrder()">提交订单</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // 这是前端 JavaScript 代码
-        async function loadFood() {
-            try {
-                // 1. 就像你在 Swagger 里点 Execute 一样，浏览器帮我们去请求 API
-                // fetch 是现代浏览器用来发请求的函数
-                const response = await fetch('/api/Food');
+        // ⚠️⚠️⚠️ 请把这里换成你的 Azure 网址，末尾不要带斜杠
+        const API_URL = "https://localhost:7035/api";
+        //const API_URL = "https://你的应用名字.azurewebsites.net/api";
 
-                // 2. 把拿到的结果转成 JSON (数组)
-                const foods = await response.json();
+        let token = localStorage.getItem("jwt_token");
+        let username = localStorage.getItem("username");
 
-                // 3. 找到那个容器
-                const container = document.getElementById('menu-container');
-                container.innerHTML = ''; // 先清空里面的字
+        // 页面加载时检查登录状态
+        checkLoginStatus();
 
-                // 4. 循环每一个菜，把它画在屏幕上
-                foods.forEach(food => {
-                    // 创建一个 div
-                    const card = document.createElement('div');
-                    card.className = 'food-card';
-
-                    // 填入内容 (这是 ES6 的模板字符串写法)
-                    card.innerHTML = `
-                                    <h2>${food.name}</h2>
-                                    <p class="price">RM ${food.price}</p>
-                                    <button onclick = "orderFood(${food.id})">Order</button>
-                                `;
-
-                    // 把卡片塞进容器
-                    container.appendChild(card);
-                });
-
-            } catch (error) {
-                console.error('出错了:', error);
-                alert('加载失败！是不是后端没跑起来？');
+        function checkLoginStatus() {
+            if (token) {
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                document.getElementById('user-info').classList.remove('hidden');
+                document.getElementById('btn-logout').classList.remove('hidden');
+                document.getElementById('user-info').innerText = `你好, ${username}`;
+                fetchOrders(); // 自动加载订单
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('dashboard-section').classList.add('hidden');
+                document.getElementById('user-info').classList.add('hidden');
+                document.getElementById('btn-logout').classList.add('hidden');
             }
         }
 
-        async function orderFood(id) {
-            // 1. 去掉 'int'，JS 不认识它
+        // 切换登录/注册界面
+        function toggleAuth(mode) {
+            if (mode === 'register') {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+            } else {
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('register-form').classList.add('hidden');
+            }
+        }
+
+        // 注册功能
+        async function register() {
+            const user = document.getElementById('reg-username').value;
+            const pass = document.getElementById('reg-password').value;
+            const role = document.getElementById('reg-role').value;
+
             try {
-                const response = await fetch('/api/Order', {
-                    method: "POST",  // 2. 这里加了逗号
-
-                    // 3. 🔥 必须加上这个 Header！告诉后端这是 JSON
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-
-                    body: JSON.stringify({
-                        foodItemId: id,
-                        // 如果后端之前把 foodItem 里的那堆 null 删了，这里就很安全
-                        // 如果后端没用 DTO，这里只要确保不传 foodItem 对象就行
-                        customerName: "VIP 客户",
-                        quantity: 1
-                    })
+                const res = await fetch(`${API_URL}/Auth/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: user, password: pass, role: role })
                 });
 
-                // 4. 给个反馈，告诉自己成功了
-                if (response.ok) {
-                    alert("🎉 下单成功！后厨正在制作！");
+                if (res.ok) {
+                    alert("注册成功！请登录");
+                    toggleAuth('login');
                 } else {
-                    alert("❌ 下单失败，去 F12 看看控制台？");
+                    alert("注册失败: " + await res.text());
                 }
-            } catch (error) {
-                console.error("网络错误:", error);
-                alert("网络连不上了？");
+            } catch (err) { alert("网络错误"); }
+        }
+
+        // 登录功能
+        async function login() {
+            const user = document.getElementById('login-username').value;
+            const pass = document.getElementById('login-password').value;
+
+            try {
+                const res = await fetch(`${API_URL}/Auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+
+                if (res.ok) {
+                    const data = await res.text() // 拿到 Token 字符串
+                    token = data;
+                    username = user;
+
+                    // 存到浏览器里，下次刷新不用重新登录
+                    localStorage.setItem("jwt_token", token);
+                    localStorage.setItem("username", username);
+
+                    checkLoginStatus();
+                } else {
+                    alert("登录失败，请检查账号密码");
+                }
+            } catch (err) {
+                console.error("🔥 详细报错:", err); // 在 F12 Console 里看这个！
+                alert("出错了: " + err.message);
             }
         }
 
-        // 页面一打开，自动加载一次
-        loadFood();
+        // 退出功能
+        function logout() {
+            localStorage.removeItem("jwt_token");
+            localStorage.removeItem("username");
+            token = null;
+            location.reload();
+        }
+
+        // 获取订单
+        async function fetchOrders() {
+            const container = document.getElementById('orders-container');
+            container.innerHTML = '<p class="text-center">正在加载...</p>';
+
+            try {
+                const res = await fetch(`${API_URL}/Order`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const orders = await res.json();
+                    container.innerHTML = ""; // 清空 loading
+
+                    if (orders.length === 0) {
+                        container.innerHTML = '<p class="text-center text-muted">暂时没有订单，快去下一单吧！</p>';
+                        return;
+                    }
+
+                    orders.forEach(order => {
+                        const date = new Date(order.orderDate).toLocaleString();
+                        // 生成卡片 HTML
+                        const html = `
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">📦 订单 #${order.id}</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">${date}</h6>
+                                            <p class="card-text">
+                                                <strong>收货人:</strong> ${order.customerName}<br>
+                                                <strong>地址:</strong> ${order.customerAddress}<br>
+                                                <strong>总价:</strong> <span class="text-danger fw-bold">$${order.totalAmount}</span>
+                                            </p>
+                                            <ul class="list-group list-group-flush">
+                                                ${order.items.map(i => `<li class="list-group-item d-flex justify-content-between"><span>${i.foodItemId}号餐</span> <span>x${i.quantity}</span></li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        container.innerHTML += html;
+                    });
+                } else {
+                    if (res.status === 401) logout(); // Token 过期自动踢出
+                    else alert("获取订单失败");
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        // 创建订单
+        async function createOrder() {
+            const name = document.getElementById('order-name').value;
+            const address = document.getElementById('order-address').value;
+
+            // 获取选中的菜品
+            const items = [];
+            document.querySelectorAll('.food-item:checked').forEach(checkbox => {
+                items.push({
+                    foodItemId: parseInt(checkbox.value),
+                    quantity: 1, // 暂时默认数量为 1
+                    price: parseFloat(checkbox.dataset.price)
+                });
+            });
+
+            if (items.length === 0) { alert("请至少选择一个菜品！"); return; }
+
+            const payload = {
+                customerName: name,
+                customerAddress: address,
+                items: items
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/Order`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("🎉 下单成功！");
+                    // 关闭弹窗
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('orderModal'));
+                    modal.hide();
+                    // 刷新列表
+                    fetchOrders();
+                } else {
+                    alert("下单失败: " + await res.text());
+                }
+            } catch (err) { alert("网络错误"); }
+        }
     </script>
 </body>
 </html>

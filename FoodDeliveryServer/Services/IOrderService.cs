@@ -5,8 +5,11 @@ namespace FoodDeliveryServer.Services
 {
     public interface IOrderService
     {
+        Task<PagedResult<Order>> GetOrdersAsync(int page, int pageSize);
         Task<List<Order>> GetOrders();
-        Task<Order> CreateOrder(CreateOrderDto order);
+        Task<List<Order>> GetOrdersByUserId(int userId);
+        Task<Order> CreateOrder(int userId, CreateOrderDto order);
+        Task SetOrderStatus(int orderId, OrderStatus status);
 
         Task<TopSpenderDto?> GetTopSpender();
     }

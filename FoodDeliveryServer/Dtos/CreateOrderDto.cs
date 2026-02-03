@@ -2,7 +2,7 @@
 {
     public class CreateOrderDto
     {
-        public int UserId { get; set; }
+        //public int UserId { get; set; }
 
         public string? CustomerNote { get; set; }
 

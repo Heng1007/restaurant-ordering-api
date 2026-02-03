@@ -10,7 +10,7 @@ namespace FoodDeliveryServer.Services
         Task<List<FoodItem>> GetAllFoods();
 
         // 2. 添加食物
-        Task AddFood(FoodItem food);
+        Task<FoodItem> AddFood(FoodItem food);
 
         // 4. 删除食物
         Task DeleteFood(int id);

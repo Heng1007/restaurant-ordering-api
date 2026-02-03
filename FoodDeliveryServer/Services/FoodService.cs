@@ -18,13 +18,18 @@ namespace FoodDeliveryServer.Services
 
         public async Task<List<FoodItem>> GetAllFoods()
         {
-            return await _context.FoodItems.Include(f => f.Id).ToListAsync();
+            return await _context.FoodItems
+                         .OrderBy(f => f.Id) // 或者是 f.Name
+                         .Where(f => !f.IsDeleted)
+                         .ToListAsync();
         }
 
-        public async Task AddFood(FoodItem food)
+        public async Task<FoodItem> AddFood(FoodItem food)
         {
             _context.FoodItems.Add(food);
             await _context.SaveChangesAsync();
+
+            return food;
         }
 
         public async Task DeleteFood(int d)
@@ -32,14 +37,16 @@ namespace FoodDeliveryServer.Services
            var food = await _context.FoodItems.FindAsync(d);
               if (food != null)
               {
-                _context.FoodItems.Remove(food);
+                food.IsDeleted = true;
                 await _context.SaveChangesAsync();
             }
         }
 
         public async Task<FoodItem?> GetFoodById(int id)
         {
-            return await _context.FoodItems.FindAsync(id);
+            return await _context.FoodItems
+                .Where(f => !f.IsDeleted)
+                .FirstOrDefaultAsync(f => f.Id == id);
         }
     }
 }

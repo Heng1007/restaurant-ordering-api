@@ -19,6 +19,8 @@
         // 👇 新增：AI 分析结果
         public string? Sentiment { get; set; }
 
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
+
         // 👇 关键：一个订单包含“一堆”具体的菜
         public List<OrderItem> Items { get; set; } = new();
     }

@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace FoodDeliveryServer.Services
+﻿namespace FoodDeliveryServer.Services
 {
     public interface IAIService
     {
