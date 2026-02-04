@@ -124,6 +124,30 @@ namespace FoodDeliveryServer.Services
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task<string?> CancelOrder(int orderId, int userId)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null)
+            {
+                return "Order not found.";
+            }
+
+            if(order.UserId != userId)
+            {
+                return "You do not have permission to cancel this order.";
+            }
+
+            if(order.Status != OrderStatus.Pending)
+            {
+                return "Only pending orders can be cancelled.";
+            }
+
+            order.Status = OrderStatus.Cancelled;
+            await _context.SaveChangesAsync();
+            return null;
+
+        }
     }
 
 }

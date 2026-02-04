@@ -104,5 +104,24 @@ namespace FoodDeliveryServer.Controllers
             await _orderService.SetOrderStatus(orderId, dto.Status);
             return NoContent();
         }
+
+        [Authorize]
+        [HttpPost("{orderId}/Cancel")]
+        public async Task<ActionResult<string>> CancelOrder(int orderId)
+        {
+            if(CurrentUserId == 0)
+            {
+                return Unauthorized("无法识别用户身份");
+            }
+
+            var errorMsg = await _orderService.CancelOrder(orderId, CurrentUserId);
+
+            if (!string.IsNullOrEmpty(errorMsg))
+            {
+                return BadRequest(errorMsg);
+            }
+
+            return Ok("订单" + orderId + "已成功取消!");
+        }
     }
 }
