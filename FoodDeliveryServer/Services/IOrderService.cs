@@ -13,5 +13,6 @@ namespace FoodDeliveryServer.Services
         Task<string?> CancelOrder(int orderId, int userId);
 
         Task<TopSpenderDto?> GetTopSpender();
+        Task<decimal> GetTotalRevenue();
     }
 }

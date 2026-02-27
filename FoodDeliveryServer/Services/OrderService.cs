@@ -103,6 +103,7 @@ namespace FoodDeliveryServer.Services
         public async Task<TopSpenderDto?> GetTopSpender()
         {
             var topSpender = await _context.Orders
+                .Where(o => o.Status != OrderStatus.Cancelled)
                 .GroupBy(o => o.UserId)
                 .Select(g => new TopSpenderDto
                 {
@@ -146,6 +147,13 @@ namespace FoodDeliveryServer.Services
             await _context.SaveChangesAsync();
             return null;
 
+        }
+
+        public async Task<decimal> GetTotalRevenue()
+        {
+            return await _context.Orders
+                .Where(o => o.Status != OrderStatus.Cancelled)
+                .SumAsync(o => o.TotalPrice);
         }
     }
 

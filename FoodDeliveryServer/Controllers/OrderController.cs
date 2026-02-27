@@ -17,7 +17,7 @@ namespace FoodDeliveryServer.Controllers
         {
             get
             {
-                var idClaim =  User.FindFirst("id")?.Value;
+                var idClaim = User.FindFirst("id")?.Value;
                 if (string.IsNullOrEmpty(idClaim) || !int.TryParse(idClaim, out int userId))
                 {
                     // 如果拿不到 ID，抛个异常或者返回 0 (视情况而定)
@@ -45,8 +45,8 @@ namespace FoodDeliveryServer.Controllers
         [Authorize]
         [HttpGet("MyOrders")]
         public async Task<ActionResult<List<Order>>> GetMyOrders()
-        {  
-            if(CurrentUserId == 0)
+        {
+            if (CurrentUserId == 0)
             {
                 return Unauthorized("无法识别用户身份");
             }
@@ -109,7 +109,7 @@ namespace FoodDeliveryServer.Controllers
         [HttpPost("{orderId}/Cancel")]
         public async Task<ActionResult<string>> CancelOrder(int orderId)
         {
-            if(CurrentUserId == 0)
+            if (CurrentUserId == 0)
             {
                 return Unauthorized("无法识别用户身份");
             }
@@ -122,6 +122,14 @@ namespace FoodDeliveryServer.Controllers
             }
 
             return Ok("订单" + orderId + "已成功取消!");
+        }
+
+        [Authorize]
+        [HttpGet("TotalRevenue")]
+        public async Task<ActionResult<decimal>> GetTotalRevenue()
+        {
+            var totalRevenue = await _orderService.GetTotalRevenue();
+            return Ok(totalRevenue);
         }
     }
 }

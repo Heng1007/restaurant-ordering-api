@@ -52,6 +52,7 @@ namespace FoodDeliveryServer.Controllers
         public async Task<ActionResult> GetTopSpender()
         {
             var stats = await _context.Orders
+                .Where(o => o.Status != OrderStatus.Cancelled)
                 .GroupBy(o => o.UserId)
                 .Select(g => new
                 {
