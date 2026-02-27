@@ -99,7 +99,7 @@ namespace FoodDeliveryServer.Controllers
 
         [Authorize(Roles = Constants.Roles.Admin)]
         [HttpPatch("{orderId}/Status")]
-        public async Task<ActionResult> SetOrderStatus(int orderId, [FromQuery] UpdateOrderStatusDto dto)
+        public async Task<ActionResult> SetOrderStatus(int orderId, [FromBody] UpdateOrderStatusDto dto)
         {
             await _orderService.SetOrderStatus(orderId, dto.Status);
             return NoContent();

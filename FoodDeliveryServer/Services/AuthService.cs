@@ -28,7 +28,7 @@ namespace FoodDeliveryServer.Services
             if (user == null)
             {
                 _logger.LogWarning($" Login Failed. Username {request.Username}' 不存在");
-                return "User not found.";
+                throw new UnauthorizedAccessException("Username does not exist.");
             }
 
             // 2. 验密码：拿用户输入的明文，跟数据库里的乱码比对
@@ -36,7 +36,7 @@ namespace FoodDeliveryServer.Services
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
                 _logger.LogWarning($"❌ 登录失败: 用户 '{request.Username}' 密码错误");
-                return "Wrong password.";
+                throw new UnauthorizedAccessException("Incorrect password.");
             }
 
             // 3. (核心) 生成 JWT Token 通行证 🎫

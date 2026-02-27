@@ -34,20 +34,37 @@ namespace FoodDeliveryServer.Middleware
 
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            // 设置 HTTP 状态码为 500 (服务器内部错误)
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-            // 创建我们刚才定义的标准错误模型
+            // 👇 这里的 switch 是核心！根据异常类型决定状态码
+            switch (exception)
+            {
+                // 如果是“未授权”异常 (密码错) -> 返回 401 Unauthorized
+                case UnauthorizedAccessException:
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    break;
+
+                // 如果是“参数不对”异常 (比如库存不足) -> 返回 400 Bad Request
+                // 你以后可以用 throw new ArgumentException("库存没了");
+                case ArgumentException:
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    break;
+
+                // 其他所有未知的错误 -> 返回 500 Internal Server Error
+                default:
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    break;
+            }
+
+            // 构建错误响应
             var response = new ErrorResponse
             {
                 StatusCode = context.Response.StatusCode,
-                // 为了安全，生产环境通常只返回 "Internal Server Error"，不给看具体错误
-                // 但为了调试方便，我们先返回 ex.Message
-                Message = "服务器开小差了: " + exception.Message
+                // 如果是 500，为了安全不要把 exception.Message 给用户看，可以写 "Internal Server Error"
+                // 如果是 401/400，把 Message 给用户看 ("Username or password incorrect.")
+                Message = context.Response.StatusCode == 500 ? "Internal Server Error" : exception.Message
             };
 
-            // 写入响应
             await context.Response.WriteAsync(response.ToString());
         }
     }

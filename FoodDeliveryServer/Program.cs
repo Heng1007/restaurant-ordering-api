@@ -43,7 +43,8 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy.WithOrigins(
-                "https://localhost:3000"
+                "http://localhost:5173",
+                "https://food-delivery-client-62vj.vercel.app"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
