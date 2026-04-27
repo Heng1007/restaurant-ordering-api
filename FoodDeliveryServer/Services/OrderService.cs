@@ -8,12 +8,10 @@ namespace FoodDeliveryServer.Services
     public class OrderService : IOrderService
     {
         private readonly AppDbContext _context;
-        private readonly IAIService _aiService;
 
-        public OrderService(AppDbContext context, IAIService aiService)
+        public OrderService(AppDbContext context)
         {
             _context = context;
-            _aiService = aiService;
         }
 
         public async Task<PagedResult<Order>> GetOrdersAsync(int page, int pageSize)
@@ -77,20 +75,12 @@ namespace FoodDeliveryServer.Services
                 finalOrderItems.Add(orderItem);
             }
 
-            string sentimentResult = "Neutral";
-            if (!string.IsNullOrEmpty(dto.CustomerNote))
-            {
-                // If the customer wrote a note, send it to AI for analysis
-                sentimentResult = await _aiService.AnalyzeSentiment(dto.CustomerNote);
-            }
-
             var order = new Order
             {
                 UserId = userId,
                 OrderDate = DateTime.Now,
                 CustomerNote = dto.CustomerNote,
                 TotalPrice = totalPrice,
-                Sentiment = sentimentResult,
                 Items = finalOrderItems,
             };
 

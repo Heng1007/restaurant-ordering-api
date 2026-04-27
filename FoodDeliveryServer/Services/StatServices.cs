@@ -41,20 +41,6 @@ namespace FoodDeliveryServer.Services
             return stats;
         }
 
-        public async Task<List<SentimentStatDto>> GetSentimentStats()
-        {
-            var stats = await _context.Orders
-                .GroupBy(o => o.Sentiment)
-                .Select(g => new SentimentStatDto
-                {
-                    Label = g.Key ?? "Unknown",
-                    Count = g.Count()
-                })
-                .ToListAsync();
-
-            return stats;
-        }
-
         public async Task<TopSpenderDto?> GetTopSpender()
         {
             var stats = await _context.Orders

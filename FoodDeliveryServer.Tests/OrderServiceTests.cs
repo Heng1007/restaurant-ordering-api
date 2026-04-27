@@ -39,11 +39,8 @@ namespace FoodDeliveryServer.Tests
             });
             await context.SaveChangesAsync(); // Save fake data
 
-            // C. Prepare the stand-in for AI service (Because OrderService needs IAIService)
-            var mockAiService = new Mock<IAIService>();
-
-            // D. Create the main subject we want to test: OrderService
-            var service = new OrderService(context, mockAiService.Object);
+            // C. Create the main subject we want to test: OrderService
+            var service = new OrderService(context);
 
             // —————— 2. Act ——————
             // Try to cancel the order
@@ -78,8 +75,7 @@ namespace FoodDeliveryServer.Tests
             });
             await context.SaveChangesAsync();
 
-            var mockIAiService = new Mock<IAIService>();
-            var orderService = new OrderService(context, mockIAiService.Object);
+            var orderService = new OrderService(context);
 
             // —————— Action ——————
             // ❌ Delete User 1's action, do not let him touch this order! Keep the order in Pending status.
@@ -110,8 +106,7 @@ namespace FoodDeliveryServer.Tests
                 TotalPrice = 100
             };
 
-            var mockAIService = new Mock<IAIService>();
-            var orderService = new OrderService(context, mockAIService.Object);
+            var orderService = new OrderService(context);
 
             context.Orders.Add(deliveredOrder); // Add order
 

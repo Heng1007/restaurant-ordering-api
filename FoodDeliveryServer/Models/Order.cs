@@ -13,11 +13,7 @@ namespace FoodDeliveryServer.Models
         // 👇 Fix: Price must be a stored static number, not calculated via get
         public decimal TotalPrice { get; set; }
 
-        // 👇 New: Customer note
         public string? CustomerNote { get; set; }
-
-        // 👇 New: AI analysis result
-        public string? Sentiment { get; set; }
 
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 

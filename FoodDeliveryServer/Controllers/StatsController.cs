@@ -32,12 +32,5 @@ namespace FoodDeliveryServer.Controllers
             var topSpender = await _statServices.GetTopSpender();
             return Ok(topSpender);
         }
-
-        [HttpGet("Sentiment")]
-        public async Task<ActionResult> GetSentimentStats()
-        {
-            var sentimentStats = await _statServices.GetSentimentStats();
-            return Ok(sentimentStats);
-        }
     }
 }

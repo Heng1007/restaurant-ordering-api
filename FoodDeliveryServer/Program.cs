@@ -28,7 +28,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // 3. Register Business Logic Services (Dependency Injection)
 builder.Services.AddScoped<IFoodService, FoodService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IStatServices, StatServices>();
 

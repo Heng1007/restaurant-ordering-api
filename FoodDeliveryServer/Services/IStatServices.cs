@@ -6,6 +6,5 @@ namespace FoodDeliveryServer.Services
     {
         Task<List<BestSellersDto>> GetBestSellers();
         Task<TopSpenderDto?> GetTopSpender();
-        Task<List<SentimentStatDto>> GetSentimentStats();
     }
 }
