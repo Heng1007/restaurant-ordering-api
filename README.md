@@ -1,4 +1,4 @@
-# 🍔 Food Delivery Platform - Cloud-Native Backend API
+# 🍔 Restaurant Online Ordering System - Cloud-Native Backend API
 
 ![.NET](https://img.shields.io/badge/.NET_9.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
@@ -6,7 +6,7 @@
 ![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)
 ![Entity Framework Core](https://img.shields.io/badge/EF_Core-512BD4?style=for-the-badge&logo=.net&logoColor=white)
 
-A robust, cloud-hosted RESTful API built with **ASP.NET Core**, serving as the backbone for a modern food delivery application. It features secure data management, real-time order tracking, and enterprise-grade AI integration for business intelligence.
+A robust, cloud-hosted RESTful API built with **ASP.NET Core**, serving as the backbone for a restaurant online ordering platform. It features secure user and menu management, order lifecycle tracking, and enterprise-grade AI integration for business intelligence.
 
 ---
 
